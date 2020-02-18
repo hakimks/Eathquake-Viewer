@@ -3,6 +3,7 @@ package com.kawesi.earthquake;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
 
@@ -15,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG_LIST_FRAGMENT = "TAG_LIST_FRAGMENT";
     EarthquakeListFragment mEarthquakeListFragment;
+    EarthQuakeViewModel mEarthQuakeViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +37,7 @@ public class MainActivity extends AppCompatActivity {
             mEarthquakeListFragment = (EarthquakeListFragment)fragmentManager.findFragmentByTag(TAG_LIST_FRAGMENT);
         }
 
-        Date dateNow = Calendar.getInstance().getTime();
-        List<Earthquake> dummyList = new ArrayList<Earthquake>();
-        dummyList.add(new Earthquake("0", dateNow, "Kampala", null, 7.3, null));
-        dummyList.add(new Earthquake("1", dateNow, "Jinja", null, 6.4, null));
-        mEarthquakeListFragment.setEarthquakes(dummyList);
+        // Retrieve the Earthquake View Model for this Activity.
+        mEarthQuakeViewModel = new ViewModelProvider(this).get(EarthQuakeViewModel.class);
     }
 }
