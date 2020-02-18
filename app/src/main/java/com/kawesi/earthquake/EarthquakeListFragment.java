@@ -11,6 +11,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,9 @@ public class EarthquakeListFragment extends Fragment {
     private EarthquakeRecyclerViewAdapter mEarthAdapter = new EarthquakeRecyclerViewAdapter(mEarthquakes);
 
     protected EarthQuakeViewModel earthquakeViewModel;
+    private SwipeRefreshLayout mSwipeToRefreshView;
+
+    private OnListFragmentInteractionListener mListener;
 
 
     public EarthquakeListFragment() {
@@ -41,6 +45,7 @@ public class EarthquakeListFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_earthquake_list, container, false);
+        mSwipeToRefreshView = view.findViewById(R.id.swipeToRefresh);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.list);
         return view;
     }
@@ -52,16 +57,34 @@ public class EarthquakeListFragment extends Fragment {
         Context context = getContext();
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         mRecyclerView.setAdapter(mEarthAdapter);
+
+        // set up swipe to refresh
+        mSwipeToRefreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateEarthQuakes();
+            }
+        });
+    }
+
+    private void updateEarthQuakes() {
+        if (mListener == null){
+            mListener.onListFragmentRefreshRequested();
+        }
+
     }
 
     public void setEarthquakes(List<Earthquake> earthquakes){
+        mEarthquakes.clear();
+        mEarthAdapter.notifyDataSetChanged();
         for (Earthquake earthquake: earthquakes) {
             if (!mEarthquakes.contains(earthquake)){
                 mEarthquakes.add(earthquake);
-                mEarthAdapter.notifyItemChanged(mEarthquakes.indexOf(earthquake));
+                mEarthAdapter.notifyItemInserted(mEarthquakes.indexOf(earthquake));
             }
             
         }
+        mSwipeToRefreshView.setRefreshing(false);
     }
 
     @Override
@@ -81,5 +104,21 @@ public class EarthquakeListFragment extends Fragment {
                         }
                     }
                 });
+    }
+
+    public interface OnListFragmentInteractionListener {
+        void onListFragmentRefreshRequested();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mListener = (OnListFragmentInteractionListener) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 }
